@@ -189,7 +189,7 @@ export default function LoginForm({ onSuccess, onSwitchToSignUp }: LoginFormProp
                         {onSwitchToSignUp && (
                             <div className="text-center pt-4 border-t">
                                 <p className="text-sm text-muted-foreground">
-                                    Don't have an account?{' '}
+                                    Dont have an account?{' '}
                                     <Button
                                         variant="link"
                                         onClick={onSwitchToSignUp}
