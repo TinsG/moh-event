@@ -43,7 +43,7 @@ export default function Dashboard() {
             await signOut()
             toast.success('Successfully signed out')
         } catch (error) {
-            toast.error('Failed to sign out')
+            toast.error('Failed to sign out ' + error)
         }
     }
 
