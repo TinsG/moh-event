@@ -37,15 +37,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
             try {
                 const { data: { session: initialSession } } = await supabase.auth.getSession()
                 setSession(initialSession)
-
                 if (initialSession?.user) {
                     const userData = await getCurrentUser()
                     setUser(userData)
+                    setLoading(false)
                 }
             } catch (error) {
                 console.error('Error getting initial session:', error)
             } finally {
-                setLoading(false)
             }
         }
 
@@ -54,20 +53,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                // console.log('Auth state changed:', event, session?.user?.email)
-
                 setSession(session)
-                // console.log('session', session?.user)
-                setLoading(false)
 
                 if (session?.user) {
                     try {
-                        const { data: userData, error: userError } = await supabase
-                            .from('users')
-                            .select('*')
-                            .eq('email', session?.user?.email)
-
-                        setUser(userData?.[0] || null)
+                        // Use the consistent getCurrentUser function instead of direct database query
+                        const userData = await getCurrentUser()
+                        setUser(userData)
                     } catch (error) {
                         console.error('Error getting user data:', error)
                         setUser(null)
@@ -79,6 +71,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 setLoading(false)
             }
         )
+
+        return () => {
+            subscription.unsubscribe()
+        }
     }, [])
 
     const signOut = async () => {

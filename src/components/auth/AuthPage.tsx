@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import LoginForm from './LoginForm'
 import SignUpForm from './SignUpForm'
 import { LogIn, UserPlus, Calendar } from 'lucide-react'
+import Image from 'next/image'
+import { getEventInfo } from '@/constants/constants'
 
 interface AuthPageProps {
     onSuccess?: () => void
@@ -15,23 +17,20 @@ interface AuthPageProps {
 export default function AuthPage({ onSuccess }: AuthPageProps) {
     const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login')
 
-    const eventInfo = {
-        name: process.env.NEXT_PUBLIC_EVENT_NAME || 'MOH Event 2024',
-        startDate: process.env.NEXT_PUBLIC_EVENT_START_DATE || '2024-03-01',
-        endDate: process.env.NEXT_PUBLIC_EVENT_END_DATE || '2024-03-03'
-    }
+    const eventInfo = getEventInfo()
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md space-y-6">
                 {/* Header */}
-                <div className="text-center space-y-2">
+                <div className="flex flex-col justify-center items-center space-y-2">
+                    <Image src="/logo.png" alt="Logo" width={100} height={100} />
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                         {eventInfo.name}
                     </h1>
                     <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
                         <Calendar className="h-4 w-4" />
-                        <span>{eventInfo.startDate} to {eventInfo.endDate}</span>
+                        <span>{eventInfo.dates}</span>
                     </div>
                 </div>
 
@@ -63,20 +62,6 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
                     </TabsContent>
                 </Tabs>
 
-                {/* Info Card */}
-                <Card className="bg-blue-50 border-blue-200">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-lg text-blue-800">System Access</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2 text-blue-700">
-                        <p className="text-sm">
-                            All users have access to registration, QR code scanning, and attendance reports.
-                        </p>
-                        <p className="text-sm text-blue-600">
-                            Contact your administrator for account creation if needed.
-                        </p>
-                    </CardContent>
-                </Card>
             </div>
         </div>
     )

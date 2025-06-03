@@ -1,5 +1,7 @@
 // Client-side QR code utilities
 
+import { getEventName } from '@/constants/constants'
+
 export interface QRCodeData {
     registrationId: string
     email: string
@@ -40,7 +42,7 @@ export function createQRCodeDataClient(
         registrationId,
         email,
         fullName,
-        eventId: process.env.NEXT_PUBLIC_EVENT_NAME || 'MOH Event 2024',
+        eventId: getEventName(),
         issuedAt: Date.now()
     }
 } 

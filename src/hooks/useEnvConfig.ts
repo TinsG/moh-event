@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { EVENT_CONFIG, getEventName, getEventStartDate, getEventEndDate, getEventDates } from '@/constants/constants'
 
 export interface EnvConfig {
     eventName: string
@@ -10,10 +11,10 @@ export interface EnvConfig {
 }
 
 const defaultConfig: EnvConfig = {
-    eventName: 'MOH Event 2024',
-    eventStartDate: '2024-03-01',
-    eventEndDate: '2024-03-03',
-    eventDates: '2024-03-01 to 2024-03-03'
+    eventName: EVENT_CONFIG.DEFAULT_EVENT_NAME,
+    eventStartDate: EVENT_CONFIG.DEFAULT_START_DATE,
+    eventEndDate: EVENT_CONFIG.DEFAULT_END_DATE,
+    eventDates: `${EVENT_CONFIG.DEFAULT_START_DATE} to ${EVENT_CONFIG.DEFAULT_END_DATE}`
 }
 
 export function useEnvConfig(): EnvConfig {
@@ -22,10 +23,10 @@ export function useEnvConfig(): EnvConfig {
     useEffect(() => {
         // Set actual environment values after hydration
         const actualConfig: EnvConfig = {
-            eventName: process.env.NEXT_PUBLIC_EVENT_NAME || defaultConfig.eventName,
-            eventStartDate: process.env.NEXT_PUBLIC_EVENT_START_DATE || defaultConfig.eventStartDate,
-            eventEndDate: process.env.NEXT_PUBLIC_EVENT_END_DATE || defaultConfig.eventEndDate,
-            eventDates: `${process.env.NEXT_PUBLIC_EVENT_START_DATE || defaultConfig.eventStartDate} to ${process.env.NEXT_PUBLIC_EVENT_END_DATE || defaultConfig.eventEndDate}`
+            eventName: getEventName(),
+            eventStartDate: getEventStartDate(),
+            eventEndDate: getEventEndDate(),
+            eventDates: getEventDates()
         }
 
         setConfig(actualConfig)

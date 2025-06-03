@@ -70,7 +70,7 @@ A comprehensive event management system features secure user authentication, QR 
    
    # Event Configuration
    NEXT_PUBLIC_EVENT_NAME="MOH Event 2024"
-   NEXT_PUBLIC_EVENT_START_DATE="2024-03-01"
+   NEXT_PUBLIC_EVENT_START_DATE="2025-06-03"
    NEXT_PUBLIC_EVENT_END_DATE="2024-03-03"
    ```
 

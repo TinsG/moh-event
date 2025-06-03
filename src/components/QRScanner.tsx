@@ -11,6 +11,7 @@ import { Camera, CameraOff, CheckCircle, XCircle, User, Calendar, Building } fro
 import { validateQRCode } from '@/lib/qr-utils'
 import { markAttendance, getCurrentEventDay } from '@/lib/attendance'
 import { supabase } from '@/lib/supabase'
+import { EVENT_CONFIG, UI_CONSTANTS, ATTENDANCE_CONFIG } from '@/constants/constants'
 
 interface RegistrationData {
     id: string
@@ -32,7 +33,7 @@ export default function QRScanner({ scannerUserId }: QRScannerProps) {
         registrationData?: RegistrationData
         day?: number
     } | null>(null)
-    const [currentDay, setCurrentDay] = useState<number>(-1)
+    const [currentDay, setCurrentDay] = useState<number>(ATTENDANCE_CONFIG.INVALID_DAY_INDICATOR)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const qrScannerRef = useRef<QrScanner | null>(null)
@@ -166,13 +167,13 @@ export default function QRScanner({ scannerUserId }: QRScannerProps) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {currentDay > 0 && currentDay <= 3 ? (
-                        <Badge variant="default" className="text-sm px-3 py-1">
-                            Day {currentDay} - Active
+                    {currentDay > 0 && currentDay <= EVENT_CONFIG.EVENT_DURATION_DAYS ? (
+                        <Badge variant={UI_CONSTANTS.BADGES.ACTIVE_VARIANT} className="text-sm px-3 py-1">
+                            {EVENT_CONFIG.DAY_LABELS[currentDay as keyof typeof EVENT_CONFIG.DAY_LABELS]} - {EVENT_CONFIG.EVENT_STATUS.ACTIVE}
                         </Badge>
                     ) : (
-                        <Badge variant="secondary" className="text-sm px-3 py-1">
-                            Event Inactive
+                        <Badge variant={UI_CONSTANTS.BADGES.INACTIVE_VARIANT} className="text-sm px-3 py-1">
+                            {EVENT_CONFIG.EVENT_STATUS.INACTIVE}
                         </Badge>
                     )}
                 </CardContent>
@@ -186,7 +187,7 @@ export default function QRScanner({ scannerUserId }: QRScannerProps) {
                         QR Code Scanner
                     </CardTitle>
                     <CardDescription>
-                        Scan attendee QR codes to mark attendance for Day {currentDay > 0 ? currentDay : 'N/A'}
+                        Scan attendee QR codes to mark attendance for {currentDay > 0 ? EVENT_CONFIG.DAY_LABELS[currentDay as keyof typeof EVENT_CONFIG.DAY_LABELS] : 'N/A'}
                     </CardDescription>
                 </CardHeader>
 

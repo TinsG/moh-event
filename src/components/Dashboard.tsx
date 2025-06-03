@@ -13,25 +13,27 @@ import { getCurrentEventDay } from '@/lib/attendance'
 import AttendanceReport from './AttendanceReport'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
+import {
+    EVENT_CONFIG,
+    UI_CONSTANTS,
+    getEventInfo
+} from '@/constants/constants'
 
 export default function Dashboard() {
     const { user, signOut } = useAuth()
     const [activeTab, setActiveTab] = useState('register')
     const [registrationCount, setRegistrationCount] = useState(0)
     const [eventInfo, setEventInfo] = useState({
-        name: 'MOH Event 2024',
-        startDate: '2024-03-01',
-        endDate: '2024-03-03'
+        name: EVENT_CONFIG.DEFAULT_EVENT_NAME,
+        startDate: EVENT_CONFIG.DEFAULT_START_DATE,
+        endDate: EVENT_CONFIG.DEFAULT_END_DATE,
+        dates: `${EVENT_CONFIG.DEFAULT_START_DATE} to ${EVENT_CONFIG.DEFAULT_END_DATE}`
     })
     const currentDay = getCurrentEventDay()
 
     // Set environment-dependent values after hydration
     useEffect(() => {
-        setEventInfo({
-            name: process.env.NEXT_PUBLIC_EVENT_NAME || 'MOH Event 2024',
-            startDate: process.env.NEXT_PUBLIC_EVENT_START_DATE || '2024-03-01',
-            endDate: process.env.NEXT_PUBLIC_EVENT_END_DATE || '2024-03-03'
-        })
+        setEventInfo(getEventInfo())
     }, [])
 
     const handleRegistrationSuccess = () => {
@@ -61,17 +63,17 @@ export default function Dashboard() {
                             {eventInfo.name}
                         </h1>
                         <div className="flex flex-wrap justify-center sm:justify-start gap-4">
-                            <Badge variant="outline" className="px-3 py-1">
+                            <Badge variant={UI_CONSTANTS.BADGES.OUTLINE_VARIANT} className="px-3 py-1">
                                 <Calendar className="mr-2 h-4 w-4" />
                                 {eventInfo.startDate} to {eventInfo.endDate}
                             </Badge>
-                            {currentDay > 0 && currentDay <= 3 ? (
-                                <Badge variant="default" className="px-3 py-1">
-                                    Day {currentDay} - Active
+                            {currentDay > 0 && currentDay <= EVENT_CONFIG.EVENT_DURATION_DAYS ? (
+                                <Badge variant={UI_CONSTANTS.BADGES.ACTIVE_VARIANT} className="px-3 py-1">
+                                    {EVENT_CONFIG.DAY_LABELS[currentDay as keyof typeof EVENT_CONFIG.DAY_LABELS]} - {EVENT_CONFIG.EVENT_STATUS.ACTIVE}
                                 </Badge>
                             ) : (
-                                <Badge variant="secondary" className="px-3 py-1">
-                                    Event Inactive
+                                <Badge variant={UI_CONSTANTS.BADGES.INACTIVE_VARIANT} className="px-3 py-1">
+                                    {EVENT_CONFIG.EVENT_STATUS.INACTIVE}
                                 </Badge>
                             )}
                         </div>
@@ -101,28 +103,31 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Registrations</CardTitle>
+                            <CardTitle className="text-sm font-medium">{UI_CONSTANTS.DASHBOARD.TITLE_REGISTRATION_COUNT}</CardTitle>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{registrationCount}</div>
                             <p className="text-xs text-muted-foreground">
-                                Registered attendees
+                                {UI_CONSTANTS.DASHBOARD.DESCRIPTION_REGISTRATIONS}
                             </p>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Current Day</CardTitle>
+                            <CardTitle className="text-sm font-medium">{UI_CONSTANTS.DASHBOARD.TITLE_CURRENT_DAY}</CardTitle>
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {currentDay > 0 && currentDay <= 3 ? `Day ${currentDay}` : 'Inactive'}
+                                {currentDay > 0 && currentDay <= EVENT_CONFIG.EVENT_DURATION_DAYS ?
+                                    EVENT_CONFIG.DAY_LABELS[currentDay as keyof typeof EVENT_CONFIG.DAY_LABELS] :
+                                    EVENT_CONFIG.EVENT_STATUS.INACTIVE
+                                }
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Event progress
+                                {UI_CONSTANTS.DASHBOARD.DESCRIPTION_PROGRESS}
                             </p>
                         </CardContent>
                     </Card>

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar, Users, Download, RefreshCw } from 'lucide-react'
 import { getAllAttendanceForDay } from '@/lib/attendance'
 import { format } from 'date-fns'
+import { EVENT_CONFIG } from '@/constants/constants'
 
 interface AttendeeData {
     registration_id: string
@@ -51,7 +52,7 @@ export default function AttendanceReport() {
             ...attendees.map(attendee => [
                 `"${attendee.full_name}"`,
                 `"${attendee.email}"`,
-                `"${format(new Date(attendee.scanned_at), 'MMM dd, yyyy HH:mm')}"`
+                `"${format(new Date(attendee.scanned_at), EVENT_CONFIG.DATE_TIME_FORMAT)}"`
             ].join(','))
         ].join('\n')
 

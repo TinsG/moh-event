@@ -1,7 +1,5 @@
 import QRCode from 'qrcode'
-import jwt from 'jsonwebtoken'
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key'
+import { getEventName } from '@/constants/constants'
 
 export interface QRCodeData {
     registrationId: string
@@ -13,9 +11,9 @@ export interface QRCodeData {
 
 export async function generateQRCode(data: QRCodeData): Promise<string> {
     try {
-        // Generate QR code from the JWT token
-        const token = jwt.sign(data, JWT_SECRET, { expiresIn: '30d' })
-        const qrCodeDataURL = await QRCode.toDataURL(token, {
+        // Generate QR code from plain JSON data
+        const qrData = JSON.stringify(data)
+        const qrCodeDataURL = await QRCode.toDataURL(qrData, {
             errorCorrectionLevel: 'M',
             type: 'image/png',
             margin: 1,
@@ -35,7 +33,15 @@ export async function generateQRCode(data: QRCodeData): Promise<string> {
 
 export function validateQRCode(qrCodeData: string): QRCodeData | null {
     try {
-        const decoded = jwt.verify(qrCodeData, JWT_SECRET) as QRCodeData
+        // Parse plain JSON data
+        const decoded = JSON.parse(qrCodeData) as QRCodeData
+
+        // Basic validation to ensure it's our QR code format
+        if (!decoded.registrationId || !decoded.email || !decoded.fullName) {
+            console.error('Invalid QR code format: missing required fields')
+            return null
+        }
+
         return decoded
     } catch (error) {
         console.error('Error validating QR code:', error)
@@ -52,7 +58,7 @@ export function createQRCodeData(
         registrationId,
         email,
         fullName,
-        eventId: process.env.NEXT_PUBLIC_EVENT_NAME || 'MOH Event 2024',
+        eventId: getEventName(),
         issuedAt: Date.now()
     }
 } 

@@ -1,3 +1,5 @@
+import { getEventDates } from '@/constants/constants'
+
 interface SendEmailParams {
     to_email: string
     to_name: string
@@ -7,7 +9,7 @@ interface SendEmailParams {
 
 export async function sendQRCodeEmail(params: SendEmailParams): Promise<boolean> {
     try {
-        const eventDates = `${process.env.NEXT_PUBLIC_EVENT_START_DATE || '2024-03-01'} to ${process.env.NEXT_PUBLIC_EVENT_END_DATE || '2024-03-03'}`
+        const eventDates = getEventDates()
 
         const response = await fetch('/api/send-email', {
             method: 'POST',

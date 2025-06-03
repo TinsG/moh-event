@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { format, isToday, startOfDay, endOfDay } from 'date-fns'
+import { EVENT_CONFIG, ATTENDANCE_CONFIG, getEventStartDate } from '@/constants/constants'
 
 export interface AttendanceRecord {
     id: string
@@ -10,7 +11,7 @@ export interface AttendanceRecord {
 }
 
 export function getCurrentEventDay(): number {
-    const eventStartDate = new Date(process.env.NEXT_PUBLIC_EVENT_START_DATE || '2024-03-01')
+    const eventStartDate = new Date(getEventStartDate())
     const today = new Date()
     const diffTime = today.getTime() - eventStartDate.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -18,10 +19,10 @@ export function getCurrentEventDay(): number {
     // Return day 1, 2, or 3 based on the event dates
     if (diffDays <= 1) return 1
     if (diffDays <= 2) return 2
-    if (diffDays <= 3) return 3
+    if (diffDays <= EVENT_CONFIG.EVENT_DURATION_DAYS) return EVENT_CONFIG.EVENT_DURATION_DAYS
 
-    // If outside event dates, return -1 to indicate invalid
-    return -1
+    // If outside event dates, return invalid indicator
+    return ATTENDANCE_CONFIG.INVALID_DAY_INDICATOR
 }
 
 export async function markAttendance(
@@ -31,10 +32,10 @@ export async function markAttendance(
     try {
         const currentDay = getCurrentEventDay()
 
-        if (currentDay === -1) {
+        if (currentDay === ATTENDANCE_CONFIG.INVALID_DAY_INDICATOR) {
             return {
                 success: false,
-                message: 'Event is not currently active. Please check the event dates.'
+                message: ATTENDANCE_CONFIG.MESSAGES.OUTSIDE_EVENT
             }
         }
 
@@ -53,14 +54,14 @@ export async function markAttendance(
             console.error('Error checking existing attendance:', checkError)
             return {
                 success: false,
-                message: 'Error checking attendance records.'
+                message: ATTENDANCE_CONFIG.MESSAGES.ERROR_CHECKING
             }
         }
 
         if (existingAttendance) {
             return {
                 success: false,
-                message: `Attendance already marked for Day ${currentDay} at ${format(new Date(existingAttendance.scanned_at), 'HH:mm')}.`
+                message: `${ATTENDANCE_CONFIG.MESSAGES.ALREADY_MARKED} ${currentDay} at ${format(new Date(existingAttendance.scanned_at), 'HH:mm')}.`
             }
         }
 

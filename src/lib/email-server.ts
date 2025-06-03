@@ -1,4 +1,9 @@
 import nodemailer from 'nodemailer'
+import {
+    EMAIL_CONFIG,
+    QR_CONFIG,
+    EVENT_CONFIG
+} from '@/constants/constants'
 
 // Email configuration types
 export interface EmailConfig {
@@ -112,8 +117,8 @@ export function generateQRCodeEmailHTML(params: {
           border: 2px dashed #cbd5e1;
         }
         .qr-code {
-          max-width: 250px;
-          height: auto;
+          max-width: ${QR_CONFIG.QR_CODE_SIZE.WIDTH}px;
+          height: ${QR_CONFIG.QR_CODE_SIZE.HEIGHT};
           margin: 20px 0;
         }
         .instructions {
@@ -143,7 +148,7 @@ export function generateQRCodeEmailHTML(params: {
       <div class="container">
         <div class="header">
           <h1>${params.eventName}</h1>
-          <p>Registration Confirmation</p>
+          <p>{EMAIL_CONFIG.CONFIRMATION_SUBJECT}</p>
         </div>
         
         <div class="content">
@@ -162,10 +167,10 @@ export function generateQRCodeEmailHTML(params: {
           <div class="instructions">
             <h4>Important Instructions:</h4>
             <ul>
-              <li>Save this email or screenshot the QR code above</li>
-              <li>Present your QR code at the event entrance each day</li>
-              <li>You can check in <span class="highlight">once per day</span> during the 3-day event</li>
-              <li>Make sure your QR code is clearly visible when scanning</li>
+              <li>${EMAIL_CONFIG.QR_CODE_INSTRUCTIONS.SAVE_EMAIL}</li>
+              <li>${EMAIL_CONFIG.QR_CODE_INSTRUCTIONS.PRESENT_QR}</li>
+              <li>You can check in <span class="highlight">once per day</span> during the ${EVENT_CONFIG.EVENT_DURATION_DAYS}-day event</li>
+              <li>${EMAIL_CONFIG.QR_CODE_INSTRUCTIONS.VISIBILITY}</li>
             </ul>
           </div>
           
@@ -176,7 +181,7 @@ export function generateQRCodeEmailHTML(params: {
         
         <div class="footer">
           <p>This is an automated email. Please do not reply to this message.</p>
-          <p>&copy; 2024 MOH Event Team. All rights reserved.</p>
+          <p>&copy; 2024 ${EMAIL_CONFIG.SENDER_NAME}. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -202,17 +207,17 @@ export async function sendQRCodeEmail(params: {
             eventDates: params.eventDates
         })
         console.log(transporter)
-        const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER || 'tgetachew1996@gmail.com'
+        const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER || EMAIL_CONFIG.DEFAULT_FROM_EMAIL
 
         const mailOptions = {
             from: {
-                name: 'MOH Event Team',
+                name: EMAIL_CONFIG.SENDER_NAME,
                 address: emailUser
             },
             to: params.to,
-            subject: `Registration Confirmed - ${params.eventName}`,
+            subject: `${EMAIL_CONFIG.EMAIL_SUBJECT_PREFIX}${params.eventName}`,
             html: emailHTML,
-            text: `Hello ${params.recipientName}!\n\nThank you for registering for ${params.eventName}. Your registration has been confirmed!\n\nEvent Dates: ${params.eventDates}\n\nYour QR code has been attached to this email. Please present it at the event for attendance tracking.\n\nImportant: You can check in once per day during the 3-day event.\n\nIf you have any questions, please contact the event organizers.\n\nWe look forward to seeing you at the event!\n\n---\nMOH Event Team`
+            text: `Hello ${params.recipientName}!\n\nThank you for registering for ${params.eventName}. Your registration has been confirmed!\n\nEvent Dates: ${params.eventDates}\n\nYour QR code has been attached to this email. Please present it at the event for attendance tracking.\n\nImportant: You can check in once per day during the ${EVENT_CONFIG.EVENT_DURATION_DAYS}-day event.\n\nIf you have any questions, please contact the event organizers.\n\nWe look forward to seeing you at the event!\n\n---\n${EMAIL_CONFIG.SENDER_NAME}`
         }
 
         const result = await transporter.sendMail(mailOptions)

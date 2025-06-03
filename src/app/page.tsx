@@ -39,18 +39,7 @@ export default function Home() {
   return (
     <AuthProvider>
       <main className="min-h-screen">
-        <ClientOnly
-          fallback={
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                <p className="text-muted-foreground">Loading...</p>
-              </div>
-            </div>
-          }
-        >
-          <AppContent />
-        </ClientOnly>
+        <AppContent />
         <Toaster
           position="top-right"
           richColors

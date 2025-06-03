@@ -37,21 +37,13 @@ export async function signUp(data: SignUpData) {
             throw new Error('Failed to create user')
         }
 
-        const userData = await supabase.from('users').select('*').eq('id', authData.user.id)
-        // // Insert user into our users table
-        // const { data: userData, error: userError } = await supabase
-        //     .from('users')
-        //     .insert({
-        //         id: authData.user.id,
-        //         email: data.email
-        //     })
-        //     .select();
-
-        // if (userError) {
-        //     // If user table insert fails, we should clean up the auth user
-        //     await supabase.auth.admin.deleteUser(authData.user.id)
-        //     throw userError
-        // }
+        // The user will be created in the users table via the database trigger
+        // Let's wait a moment and then fetch the user data if there's a session
+        let userData = null
+        if (authData.session) {
+            // User is logged in, we can fetch their data
+            userData = await getCurrentUser()
+        }
 
         return {
             user: userData,
@@ -114,9 +106,8 @@ export async function signOut() {
 export async function getCurrentUser(): Promise<AuthUser | null> {
     try {
         const { data: { user }, error } = await supabase.auth.getUser()
-        console.log('user', error)
+
         if (error) {
-            console.log('error', error)
             throw error
         }
 
@@ -129,13 +120,14 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
             .from('users')
             .select('*')
             .eq('id', user.id)
-        console.log('userData', userData)
+            .single()
+
         if (userError) {
             console.error('Error fetching user data:', userError)
             return null
         }
-        console.log('userData', userData)
-        return userData[0]
+
+        return userData
     } catch (error) {
         console.error('Get current user error:', error)
         return null

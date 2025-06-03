@@ -1,6 +1,6 @@
 'use client'
 'use strict'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -13,6 +13,13 @@ import { Loader2, UserPlus, Mail, Phone, Building, Briefcase } from 'lucide-reac
 import { supabase } from '@/lib/supabase'
 import { generateQRCodeClient, createQRCodeDataClient } from '@/lib/qr-client'
 import { sendQRCodeEmail } from '@/lib/email'
+import {
+    EVENT_CONFIG,
+    UI_CONSTANTS,
+    QR_CONFIG,
+    getEventName,
+    getEventDates
+} from '@/constants/constants'
 
 // Client-side email sending function
 async function sendQRCodeEmailClient(params: {
@@ -53,10 +60,14 @@ interface RegistrationFormProps {
 
 export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [eventName, setEventName] = useState('MOH Event 2024')
-    const [eventDates, setEventDates] = useState('2024-03-01 to 2024-03-03')
+    const [eventName, setEventName] = useState<string>(EVENT_CONFIG.DEFAULT_EVENT_NAME)
+    const [eventDates, setEventDates] = useState<string>(`${EVENT_CONFIG.DEFAULT_START_DATE} to ${EVENT_CONFIG.DEFAULT_END_DATE}`)
 
-
+    // Set environment-dependent values after hydration
+    useEffect(() => {
+        setEventName(getEventName())
+        setEventDates(getEventDates())
+    }, [])
 
     const form = useForm<RegistrationFormData>({
         resolver: zodResolver(registrationSchema),
@@ -86,7 +97,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
             }
 
             // Generate QR code data
-            const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            const tempId = `${QR_CONFIG.TEMP_ID_PREFIX}${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
             const qrCodeData = createQRCodeDataClient(tempId, data.email, data.fullName)
             const qrCodeImage = await generateQRCodeClient(qrCodeData)
 
@@ -151,9 +162,9 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                     <div className="flex justify-center mb-2">
                         <UserPlus className="h-8 w-8 text-primary" />
                     </div>
-                    <CardTitle className="text-2xl font-bold">Event Registration</CardTitle>
+                    <CardTitle className="text-2xl font-bold">{UI_CONSTANTS.REGISTRATION_FORM.TITLE}</CardTitle>
                     <CardDescription className="text-base">
-                        Please fill in your details to register for {eventName}
+                        {UI_CONSTANTS.REGISTRATION_FORM.DESCRIPTION_PREFIX} {eventName}
                     </CardDescription>
                 </CardHeader>
 

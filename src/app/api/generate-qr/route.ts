@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateQRCode, type QRCodeData } from '@/lib/qr-utils'
 import { z } from 'zod'
+import { getEventName } from '@/constants/constants'
 
 // Request validation schema
 const qrCodeRequestSchema = z.object({
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
             registrationId: validatedData.registrationId,
             email: validatedData.email,
             fullName: validatedData.fullName,
-            eventId: validatedData.eventId || process.env.NEXT_PUBLIC_EVENT_NAME || 'MOH Event 2024',
+            eventId: validatedData.eventId || getEventName(),
             issuedAt: validatedData.issuedAt || Date.now()
         }
 
