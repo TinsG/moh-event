@@ -16,7 +16,7 @@ interface AuthPageProps {
 }
 
 export default function AuthPage({ onSuccess }: AuthPageProps) {
-    const [activeTab, setActiveTab] = useState<'login' | 'signup' | 'register'>('register')
+    const [activeTab, setActiveTab] = useState<'login' | 'register'>('register')
 
     const eventInfo = getEventInfo()
 
@@ -39,35 +39,27 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
                 </div>
 
                 {/* Auth Forms */}
-                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'signup' | 'register')}>
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="register" className="flex items-center gap-1 text-xs">
+                <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')}>
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="register" className="flex items-center gap-1 text-xs hover:cursor-pointer">
                             <CalendarPlus className="h-3 w-3" />
                             Register
                         </TabsTrigger>
-                        <TabsTrigger value="login" className="flex items-center gap-1 text-xs">
+                        <TabsTrigger value="login" className="flex items-center gap-1 text-xs hover:cursor-pointer">
                             <LogIn className="h-3 w-3" />
                             Sign In
                         </TabsTrigger>
-                        <TabsTrigger value="signup" className="flex items-center gap-1 text-xs">
-                            <UserPlus className="h-3 w-3" />
-                            Sign Up
-                        </TabsTrigger>
+
                     </TabsList>
 
                     <TabsContent value="login" className="mt-6">
                         <LoginForm
                             onSuccess={onSuccess}
-                            onSwitchToSignUp={() => setActiveTab('signup')}
+
                         />
                     </TabsContent>
 
-                    <TabsContent value="signup" className="mt-6">
-                        <SignUpForm
-                            onSuccess={onSuccess}
-                            onSwitchToLogin={() => setActiveTab('login')}
-                        />
-                    </TabsContent>
+
 
                     <TabsContent value="register" className="mt-6">
                         <Card className="shadow-lg">
@@ -98,14 +90,8 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
                                         >
                                             Sign In
                                         </Button>
-                                        {' '}or{' '}
-                                        <Button
-                                            variant="link"
-                                            onClick={() => setActiveTab('signup')}
-                                            className="p-0 h-auto text-sm font-medium"
-                                        >
-                                            Create Account
-                                        </Button>
+                                        {' '}
+
                                     </p>
                                 </div>
                             </CardContent>

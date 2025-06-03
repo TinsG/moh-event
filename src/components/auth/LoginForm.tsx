@@ -22,10 +22,10 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 interface LoginFormProps {
     onSuccess?: () => void
-    onSwitchToSignUp?: () => void
+
 }
 
-export default function LoginForm({ onSuccess, onSwitchToSignUp }: LoginFormProps) {
+export default function LoginForm({ onSuccess }: LoginFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [showResetPassword, setShowResetPassword] = useState(false)
@@ -186,20 +186,6 @@ export default function LoginForm({ onSuccess, onSwitchToSignUp }: LoginFormProp
                             </div>
                         )}
 
-                        {onSwitchToSignUp && (
-                            <div className="text-center pt-4 border-t">
-                                <p className="text-sm text-muted-foreground">
-                                    Dont have an account?{' '}
-                                    <Button
-                                        variant="link"
-                                        onClick={onSwitchToSignUp}
-                                        className="p-0 h-auto text-sm font-medium"
-                                    >
-                                        Create Account
-                                    </Button>
-                                </p>
-                            </div>
-                        )}
                     </div>
                 </CardContent>
             </Card>
