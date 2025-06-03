@@ -50,8 +50,8 @@ function createEmailTransporter() {
 
     return nodemailer.createTransport({
         host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
+        port: 465,
+        secure: true,
         auth: {
             user: emailUser,
             pass: emailPass
@@ -65,7 +65,10 @@ export function generateQRCodeEmailHTML(params: {
     eventName: string
     qrCodeData: string
     eventDates: string
+    useCid?: boolean
 }) {
+    const qrImageSrc = params.useCid ? 'cid:qrcode' : params.qrCodeData
+
     return `
     <!DOCTYPE html>
     <html>
@@ -117,9 +120,13 @@ export function generateQRCodeEmailHTML(params: {
           border: 2px dashed #cbd5e1;
         }
         .qr-code {
-          max-width: ${QR_CONFIG.QR_CODE_SIZE.WIDTH}px;
-          height: ${QR_CONFIG.QR_CODE_SIZE.HEIGHT};
-          margin: 20px 0;
+          display: block;
+          max-width: 250px;
+          width: 250px;
+          height: auto;
+          margin: 20px auto;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
         }
         .instructions {
           background-color: #eff6ff;
@@ -148,7 +155,7 @@ export function generateQRCodeEmailHTML(params: {
       <div class="container">
         <div class="header">
           <h1>${params.eventName}</h1>
-          <p>{EMAIL_CONFIG.CONFIRMATION_SUBJECT}</p>
+         
         </div>
         
         <div class="content">
@@ -160,7 +167,7 @@ export function generateQRCodeEmailHTML(params: {
           <div class="qr-section">
             <h3>Your Event QR Code</h3>
             <p>Please save this QR code and present it at the event for attendance tracking:</p>
-            <img src="${params.qrCodeData}" alt="Event QR Code" class="qr-code" />
+            <img src="${qrImageSrc}" alt="Event QR Code" class="qr-code" style="display: block; max-width: 250px; width: 250px; height: auto; margin: 20px auto;" />
             <p><em>This QR code is unique to you and should not be shared.</em></p>
           </div>
           
@@ -200,34 +207,85 @@ export async function sendQRCodeEmail(params: {
     try {
         const transporter = createEmailTransporter()
 
-        const emailHTML = generateQRCodeEmailHTML({
+        // Debug logging for QR code data
+        console.log('🎯 Sending email with QR code data:', {
+            to: params.to,
             recipientName: params.recipientName,
+            qrCodeDataLength: params.qrCodeData?.length || 0,
+            qrCodeDataPreview: params.qrCodeData?.substring(0, 50) + '...',
+            isDataURL: params.qrCodeData?.startsWith('data:'),
             eventName: params.eventName,
-            qrCodeData: params.qrCodeData,
             eventDates: params.eventDates
         })
-        console.log(transporter)
-        const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER || EMAIL_CONFIG.DEFAULT_FROM_EMAIL
 
-        const mailOptions = {
-            from: {
-                name: EMAIL_CONFIG.SENDER_NAME,
-                address: emailUser
-            },
-            to: params.to,
-            subject: `${EMAIL_CONFIG.EMAIL_SUBJECT_PREFIX}${params.eventName}`,
-            html: emailHTML,
-            text: `Hello ${params.recipientName}!\n\nThank you for registering for ${params.eventName}. Your registration has been confirmed!\n\nEvent Dates: ${params.eventDates}\n\nYour QR code has been attached to this email. Please present it at the event for attendance tracking.\n\nImportant: You can check in once per day during the ${EVENT_CONFIG.EVENT_DURATION_DAYS}-day event.\n\nIf you have any questions, please contact the event organizers.\n\nWe look forward to seeing you at the event!\n\n---\n${EMAIL_CONFIG.SENDER_NAME}`
+        // Try both approaches: CID attachment and inline data URL
+        const useCid = true // Try CID first for better compatibility
+
+        let mailOptions
+        if (useCid && params.qrCodeData.startsWith('data:')) {
+            // Extract base64 data from data URL
+            const base64Data = params.qrCodeData.split(',')[1]
+
+            const emailHTML = generateQRCodeEmailHTML({
+                recipientName: params.recipientName,
+                eventName: params.eventName,
+                qrCodeData: params.qrCodeData,
+                eventDates: params.eventDates,
+                useCid: true
+            })
+
+            const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER || EMAIL_CONFIG.DEFAULT_FROM_EMAIL
+
+            mailOptions = {
+                from: {
+                    name: EMAIL_CONFIG.SENDER_NAME,
+                    address: emailUser
+                },
+                to: params.to,
+                subject: `${EMAIL_CONFIG.EMAIL_SUBJECT_PREFIX}${params.eventName}`,
+                html: emailHTML,
+                text: `Hello ${params.recipientName}!\n\nThank you for registering for ${params.eventName}. Your registration has been confirmed!\n\nEvent Dates: ${params.eventDates}\n\nYour QR code has been attached to this email. Please present it at the event for attendance tracking.\n\nImportant: You can check in once per day during the ${EVENT_CONFIG.EVENT_DURATION_DAYS}-day event.\n\nIf you have any questions, please contact the event organizers.\n\nWe look forward to seeing you at the event!\n\n---\n${EMAIL_CONFIG.SENDER_NAME}`,
+                attachments: [{
+                    filename: 'qr-code.png',
+                    content: base64Data,
+                    encoding: 'base64',
+                    cid: 'qrcode'
+                }]
+            }
+        } else {
+            // Fallback to inline data URL
+            const emailHTML = generateQRCodeEmailHTML({
+                recipientName: params.recipientName,
+                eventName: params.eventName,
+                qrCodeData: params.qrCodeData,
+                eventDates: params.eventDates,
+                useCid: false
+            })
+
+            const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER || EMAIL_CONFIG.DEFAULT_FROM_EMAIL
+
+            mailOptions = {
+                from: {
+                    name: EMAIL_CONFIG.SENDER_NAME,
+                    address: emailUser
+                },
+                to: params.to,
+                subject: `${EMAIL_CONFIG.EMAIL_SUBJECT_PREFIX}${params.eventName}`,
+                html: emailHTML,
+                text: `Hello ${params.recipientName}!\n\nThank you for registering for ${params.eventName}. Your registration has been confirmed!\n\nEvent Dates: ${params.eventDates}\n\nYour QR code has been attached to this email. Please present it at the event for attendance tracking.\n\nImportant: You can check in once per day during the ${EVENT_CONFIG.EVENT_DURATION_DAYS}-day event.\n\nIf you have any questions, please contact the event organizers.\n\nWe look forward to seeing you at the event!\n\n---\n${EMAIL_CONFIG.SENDER_NAME}`
+            }
         }
 
         const result = await transporter.sendMail(mailOptions)
+
+        console.log('✅ Email sent successfully:', result.messageId)
 
         return {
             success: true,
             messageId: result.messageId
         }
     } catch (error) {
-        console.error('Email sending error:', error)
+        console.error('❌ Email sending error:', error)
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error occurred'

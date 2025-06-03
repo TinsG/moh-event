@@ -40,11 +40,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 if (initialSession?.user) {
                     const userData = await getCurrentUser()
                     setUser(userData)
-                    setLoading(false)
+                } else {
+                    setUser(null)
                 }
             } catch (error) {
                 console.error('Error getting initial session:', error)
+                setUser(null)
             } finally {
+                setLoading(false)
             }
         }
 

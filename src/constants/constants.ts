@@ -1,7 +1,7 @@
 // Event Configuration Constants
 export const EVENT_CONFIG = {
     // Default event information
-    DEFAULT_EVENT_NAME: 'MOH Event 2025',
+    DEFAULT_EVENT_NAME: 'GHIQS 2025',
     DEFAULT_START_DATE: '2025-06-25',
     DEFAULT_END_DATE: '2025-06-27',
 
