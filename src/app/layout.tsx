@@ -65,7 +65,7 @@ export default function RootLayout({
       >
         {children}
 
-        <footer className="fixed bottom-0 w-full bg-white border-t py-2 text-center text-sm text-gray-600">
+        <footer className="bottom-0 w-full bg-white border-t py-2 text-center text-sm text-gray-600">
           Powered by{' '}
           <a
             href="https://jlinkdigital.com/"
