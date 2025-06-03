@@ -33,7 +33,12 @@ export default function Dashboard() {
 
     // Set environment-dependent values after hydration
     useEffect(() => {
-        setEventInfo(getEventInfo())
+        setEventInfo({
+            name: EVENT_CONFIG.DEFAULT_EVENT_NAME,
+            startDate: EVENT_CONFIG.DEFAULT_START_DATE,
+            endDate: EVENT_CONFIG.DEFAULT_END_DATE,
+            dates: `${EVENT_CONFIG.DEFAULT_START_DATE} to ${EVENT_CONFIG.DEFAULT_END_DATE}`
+        })
     }, [])
 
     const handleRegistrationSuccess = () => {
