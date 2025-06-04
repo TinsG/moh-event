@@ -164,7 +164,7 @@ export default function RegistrationForm({ onSuccess }: RegistrationFormProps) {
                     </div>
                     <CardTitle className="text-2xl font-bold">{UI_CONSTANTS.REGISTRATION_FORM.TITLE}</CardTitle>
                     <CardDescription className="text-base">
-                        {UI_CONSTANTS.REGISTRATION_FORM.DESCRIPTION_PREFIX} {eventName}
+                        {UI_CONSTANTS.REGISTRATION_FORM.DESCRIPTION_PREFIX}
                     </CardDescription>
                 </CardHeader>
 

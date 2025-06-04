@@ -6,23 +6,25 @@ import { supabase } from '@/lib/supabase';
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    resetApplicationForm: () => void;
-    setResetApplicationForm: (resetFn: () => void) => void;
+    signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     loading: true,
-    resetApplicationForm: () => { },
-    setResetApplicationForm: () => { },
+    signOut: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
 
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [resetApplicationForm, setResetApplicationForm] = useState<() => void>(() => { });
+
+    const signOut = async () => {
+        await supabase.auth.signOut();
+    };
 
     useEffect(() => {
         // Check active sessions and sets the user
@@ -42,5 +44,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => subscription.unsubscribe();
     }, []);
 
-    return <AuthContext.Provider value={{ user, loading, resetApplicationForm, setResetApplicationForm }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>;
 }
