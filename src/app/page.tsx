@@ -7,7 +7,6 @@ import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { Toaster } from '@/components/ui/sonner'
 import { initializeEmailJS } from '@/lib/email'
 import { Loader2 } from 'lucide-react'
-import ClientOnly from '@/components/ClientOnly'
 
 function AppContent() {
   const { user, loading } = useAuth()
