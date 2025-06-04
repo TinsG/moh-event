@@ -69,7 +69,7 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
                                 </div>
                                 <CardTitle className="text-2xl font-bold">Event Registration</CardTitle>
                                 <CardDescription>
-                                    Register for {eventInfo.name} and receive your QR code
+                                    Register for Global Health Innovation and Quality Summit 2025 and receive your QR code
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>

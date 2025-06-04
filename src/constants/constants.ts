@@ -80,7 +80,7 @@ export const UI_CONSTANTS = {
 
     REGISTRATION_FORM: {
         TITLE: 'Event Registration',
-        DESCRIPTION_PREFIX: 'Please fill in your details to register for'
+        DESCRIPTION_PREFIX: 'Please fill in your details to register for Global Health Innovation and Quality Summit 2025'
     },
 
     DASHBOARD: {
