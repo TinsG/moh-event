@@ -18,11 +18,14 @@ import {
     UI_CONSTANTS,
     getEventInfo
 } from '@/constants/constants'
+import RegisteredUsersTable from './RegisteredUsersTable'
+import { supabase } from '@/lib/supabase'
 
 export default function Dashboard() {
     const { user, signOut } = useAuth()
-    const [activeTab, setActiveTab] = useState('register')
+    const [activeTab, setActiveTab] = useState('users')
     const [registrationCount, setRegistrationCount] = useState(0)
+    const [organizationCount, setOrganizationCount] = useState(0)
     const [eventInfo, setEventInfo] = useState({
         name: EVENT_CONFIG.DEFAULT_EVENT_NAME,
         startDate: EVENT_CONFIG.DEFAULT_START_DATE,
@@ -31,7 +34,31 @@ export default function Dashboard() {
     })
     const currentDay = getCurrentEventDay()
 
-    // Set environment-dependent values after hydration
+    // Fetch total registration count
+    const fetchRegistrationCount = async () => {
+        const { count, error } = await supabase
+            .from('registrations')
+            .select('*', { count: 'exact', head: true })
+        if (!error && typeof count === 'number') {
+            setRegistrationCount(count)
+        }
+    }
+
+    // Fetch total unique organizations
+    const fetchOrganizationCount = async () => {
+        const { data, error } = await supabase
+            .from('registrations')
+            .select('organization')
+        if (!error && Array.isArray(data)) {
+            const uniqueOrgs = new Set(
+                data
+                    .map((u: any) => u.organization?.toLowerCase().trim())
+                    .filter(Boolean)
+            )
+            setOrganizationCount(uniqueOrgs.size)
+        }
+    }
+
     useEffect(() => {
         setEventInfo({
             name: EVENT_CONFIG.DEFAULT_EVENT_NAME,
@@ -39,10 +66,13 @@ export default function Dashboard() {
             endDate: EVENT_CONFIG.DEFAULT_END_DATE,
             dates: `${EVENT_CONFIG.DEFAULT_START_DATE} to ${EVENT_CONFIG.DEFAULT_END_DATE}`
         })
+        fetchRegistrationCount()
+        fetchOrganizationCount()
     }, [])
 
     const handleRegistrationSuccess = () => {
-        setRegistrationCount(prev => prev + 1)
+        fetchRegistrationCount()
+        fetchOrganizationCount()
     }
 
     const handleSignOut = async () => {
@@ -105,7 +135,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">{UI_CONSTANTS.DASHBOARD.TITLE_REGISTRATION_COUNT}</CardTitle>
@@ -115,6 +145,19 @@ export default function Dashboard() {
                             <div className="text-2xl font-bold">{registrationCount}</div>
                             <p className="text-xs text-muted-foreground">
                                 {UI_CONSTANTS.DASHBOARD.DESCRIPTION_REGISTRATIONS}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Organizations Attended</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{organizationCount}</div>
+                            <p className="text-xs text-muted-foreground">
+                                Total unique organizations with registered users
                             </p>
                         </CardContent>
                     </Card>
@@ -140,7 +183,11 @@ export default function Dashboard() {
 
                 {/* Main Content Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="users" className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span className="hidden sm:inline">Registered Users</span>
+                        </TabsTrigger>
                         <TabsTrigger value="register" className="flex items-center gap-2">
                             <UserPlus className="h-4 w-4" />
                             <span className="hidden sm:inline">Register</span>
@@ -154,6 +201,23 @@ export default function Dashboard() {
                             <span className="hidden sm:inline">Reports</span>
                         </TabsTrigger>
                     </TabsList>
+
+                    <TabsContent value="users" className="space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Users className="h-5 w-5" />
+                                    Registered Users
+                                </CardTitle>
+                                <CardDescription>
+                                    View, search, filter, and export the list of all registered users for the event.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <RegisteredUsersTable />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
 
                     <TabsContent value="register" className="space-y-4">
                         <Card>
